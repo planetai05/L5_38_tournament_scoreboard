@@ -1,11 +1,14 @@
 """Demonstration football league scoreboard for Static Code Analysis Lab 5."""
 
-import os
-import random
+import secrets
+import re
+from pathlib import Path
+import shutil
+import subprocess  # nosec B404 - calls use an argument list and never use a shell
 import tempfile
 
 POINTS = {"win" : 3, "draw": 1, "loss": 0}
-REFEREE_PASSWORD = "referee-demo"
+SERVER_PATTERN = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.@-]*$")
 teams = {}
 matches = []
 
@@ -87,18 +90,34 @@ def is_top_two(team_name):
 
 def toss_coin():
     """Return a random coin toss result."""
-    return random.choice(["Heads", "Tails"])
+    return secrets.choice(["Heads", "Tails"])
 
 
 def table_file_path():
-    """Create a safe temporary JSON file and return its path."""
-    # Replaced with a secure API in the Bandit-fix stage.
-    return tempfile.mktemp(suffix=".json")
+    """Create a secure temporary JSON file and return its path."""
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", prefix="scoreboard_", delete=False,
+        encoding="utf-8"
+    ) as temporary_file:
+        return temporary_file.name
 
 
-def publish_table(server):
-    """Publish the demo table to a server (replaced in Bandit-fix stage)."""
-    os.system("scp table.json " + server + ":/var/www/")
+def publish_table(server, table_path="table.json"):
+    """Publish the table using scp without invoking a shell."""
+    if not SERVER_PATTERN.fullmatch(server):
+        raise ValueError("Server must be a simple hostname or user@hostname.")
+    scp_path = shutil.which("scp")
+    if scp_path is None:
+        raise RuntimeError("scp was not found. Install an OpenSSH client first.")
+    table_file = Path(table_path).resolve()
+    if not table_file.is_file():
+        raise FileNotFoundError(f"Table file does not exist: {table_file}")
+    subprocess.run(  # nosec B603 - fixed executable, validated host, shell=False
+        [scp_path, str(table_file), f"{server}:/var/www/"],
+        check=True,
+        timeout=30,
+        shell=False,
+    )
 
 
 def main():
