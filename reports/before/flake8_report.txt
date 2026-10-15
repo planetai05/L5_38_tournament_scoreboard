@@ -1,0 +1,10 @@
+original/tournament_scoreboard.py:5:16: E203 whitespace before ':'
+original/tournament_scoreboard.py:24:1: E302 expected 2 blank lines, found 1
+original/tournament_scoreboard.py:40:1: E302 expected 2 blank lines, found 1
+original/tournament_scoreboard.py:53:1: E302 expected 2 blank lines, found 1
+original/tournament_scoreboard.py:57:1: E302 expected 2 blank lines, found 1
+original/tournament_scoreboard.py:60:1: E302 expected 2 blank lines, found 1
+original/tournament_scoreboard.py:69:1: E302 expected 2 blank lines, found 1
+original/tournament_scoreboard.py:74:51: E231 missing whitespace after ','
+original/tournament_scoreboard.py:82:43: E261 at least two spaces before inline comment
+original/tournament_scoreboard.py:86:1: E305 expected 2 blank lines after class or function definition, found 1

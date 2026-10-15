@@ -1,13 +1,13 @@
 """Demonstration football league scoreboard for Static Code Analysis Lab 5."""
 
-import secrets
 import re
-from pathlib import Path
+import secrets
 import shutil
-import subprocess  # nosec B404 - calls use an argument list and never use a shell
+import subprocess  # nosec B404
 import tempfile
+from pathlib import Path
 
-POINTS = {"win" : 3, "draw": 1, "loss": 0}
+POINTS = {"win": 3, "draw": 1, "loss": 0}
 SERVER_PATTERN = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.@-]*$")
 teams = {}
 matches = []
@@ -84,7 +84,10 @@ def league_table():
 
 
 def is_top_two(team_name):
-    """Return whether a team is in the top two, handling short tables safely."""
+    """Return whether a team is in the top two.
+
+    Handles tables with fewer than two teams.
+    """
     return team_name in league_table()[:2]
 
 
@@ -96,8 +99,11 @@ def toss_coin():
 def table_file_path():
     """Create a secure temporary JSON file and return its path."""
     with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", prefix="scoreboard_", delete=False,
-        encoding="utf-8"
+        mode="w",
+        suffix=".json",
+        prefix="scoreboard_",
+        delete=False,
+        encoding="utf-8",
     ) as temporary_file:
         return temporary_file.name
 
@@ -108,11 +114,14 @@ def publish_table(server, table_path="table.json"):
         raise ValueError("Server must be a simple hostname or user@hostname.")
     scp_path = shutil.which("scp")
     if scp_path is None:
-        raise RuntimeError("scp was not found. Install an OpenSSH client first.")
+        raise RuntimeError(
+            "scp was not found. Install an OpenSSH client first."
+        )
     table_file = Path(table_path).resolve()
     if not table_file.is_file():
         raise FileNotFoundError(f"Table file does not exist: {table_file}")
-    subprocess.run(  # nosec B603 - fixed executable, validated host, shell=False
+    # The executable and argument list are fixed; the host is validated above.
+    subprocess.run(  # nosec B603
         [scp_path, str(table_file), f"{server}:/var/www/"],
         check=True,
         timeout=30,
